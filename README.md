@@ -4,7 +4,7 @@ Ongoing project based on the [Google File System](https://static.googleuserconte
 ## Notice:
 - Added basic CREATE, READ, APPEND & DELETE operations
 - Working on adding Remote Procedure Calls with `rpyc`
-- Will add `list` command to the commands
+- Will add `list` command
 
 ## Dependency
 - rpyc
