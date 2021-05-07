@@ -12,12 +12,16 @@ Ongoing project based on the [Google File System](https://static.googleuserconte
 ### Commands
 - `python client.py create <file_name>` 
     - Creates a new file with given `<file_name>`
-- `python client.py append <file_name> <string>`
-    - Appends `<string>` to file `<file_name>`
+
 - `python client.py read <file_name> <data>`
     - Reads `<data>` of the file `<file_name>`
+
+- `python client.py append <file_name> <string>`
+    - Appends `<string>` to file `<file_name>`
+
 - `python client.py delete <file_name>`
     - Deletes file `<file_name>`
+
 - `python client.py list <prefix>`
     - TO BE ADDED: Lists all files whose absolute path have prefix `<prefix>`
 
