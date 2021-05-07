@@ -1,8 +1,6 @@
 import uuid
-
 import rpyc
 from rpyc.utils.server import ThreadedServer
-
 import config
 
 
@@ -59,6 +57,6 @@ class GFSMasterService(rpyc.Service):
 
 
 if __name__ == "__main__":
-    t = ThreadedServer(GFSMasterService, port=2030)
+    t = ThreadedServer(GFSMasterService, port=config.MASTER_PORT)
     t.start()
     print("GFSMaster is Running!")

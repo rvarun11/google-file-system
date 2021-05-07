@@ -34,5 +34,5 @@ class GFSChunkService(rpyc.Service):
 if __name__ == "__main__":
     if not os.path.isdir(DATA_DIR):
         os.mkdir(DATA_DIR)
-    t = ThreadedServer(GFSChunkService, port=8888)
+    t = ThreadedServer(GFSChunkService, port=8010)
     t.start()
