@@ -1,15 +1,16 @@
 # google-file-system
 Ongoing project based on the [Google File System](https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf)
 
-## Notice:
+## Notice
 - Added basic CREATE, READ, APPEND & DELETE operations
 - Working on adding Remote Procedure Calls with `rpyc`
-- Will add `list` command
+- Add folder functionality
+- Add `list` command
 
 ## Dependency
 - rpyc
 
-### Commands
+## Commands
 - Create: `python client.py create <file_name>` 
 
 - Read: `python client.py read <file_name> <data>`
