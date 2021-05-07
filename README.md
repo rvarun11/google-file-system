@@ -4,9 +4,10 @@ Ongoing project based on the [Google File System](https://static.googleuserconte
 ## Notice
 - Added basic CREATE, READ, APPEND & DELETE operations
 - Working on adding Remote Procedure Calls with `rpyc`
-- Add folder functionality
-- Add `list` command
-- Add heartbeat monitor
+- Will add later:
+  - folder functionality
+  - `list` command  
+  - heartbeat monitor
 
 ## Dependency
 - rpyc
