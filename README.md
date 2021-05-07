@@ -7,6 +7,7 @@ Project is based on the paper [Google File System](https://static.googleusercont
 - Added basic CREATE, READ, APPEND & DELETE operations
 - Working on adding Remote Procedure Calls with `rpyc`
 - Will add later:
+  - replicas of chunks across servers based on the replication factor 
   - `list` command  
   - heartbeat monitor
 
