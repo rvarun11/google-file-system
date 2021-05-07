@@ -1,8 +1,8 @@
-# Google File System
-Ongoing project
+# Google-File-System
+Ongoing project based on the [Google File System](https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf)
 
 ## Notice:
-    - Added basic CRUD operations
+    - Added basic CRUD operations.
     - Working on adding Remote Procedure Calls with `rpyc`
     - Will add `list` command to the commands
 
