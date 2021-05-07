@@ -10,17 +10,13 @@ Ongoing project based on the [Google File System](https://static.googleuserconte
 - rpyc
 
 ### Commands
-- `python client.py create <file_name>` 
-    - Creates a new file with given `<file_name>`
+- CREATE: `python client.py create <file_name>` 
 
-- `python client.py read <file_name> <data>`
-    - Reads `<data>` of the file `<file_name>`
+- READ: `python client.py read <file_name> <data>`
 
-- `python client.py append <file_name> <string>`
-    - Appends `<string>` to file `<file_name>`
+- APPEND: `python client.py append <file_name> <string>`
 
-- `python client.py delete <file_name>`
-    - Deletes file `<file_name>`
+- DELETE: `python client.py delete <file_name>`
 
 - `python client.py list <prefix>`
     - TO BE ADDED: Lists all files whose absolute path have prefix `<prefix>`
