@@ -1,5 +1,6 @@
 # google-file-system
-Ongoing project based on the [Google File System](https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf)
+![status](https://img.shields.io/badge/status-ongoing-12B4EB) 
+Project is based on the paper [Google File System](https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf)
 
 ## Notice
 - Added basic CREATE, READ, APPEND & DELETE operations
