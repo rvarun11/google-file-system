@@ -6,6 +6,7 @@ Ongoing project based on the [Google File System](https://static.googleuserconte
 - Working on adding Remote Procedure Calls with `rpyc`
 - Add folder functionality
 - Add `list` command
+- Add heartbeat monitor
 
 ## Dependency
 - rpyc
