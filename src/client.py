@@ -19,16 +19,23 @@ class GFSClient:
 
     def __write_chunks(self, chunk_ids, data):
         """Writes data to chunk servers for given List of Chunk IDs and Data"""
-        chunks_data = [
+        chunk_data = [
             data[x : x + self.master.chunk_size]
             for x in range(0, len(data), self.master.chunk_size)
         ]
-        chunk_servers = self.master.get_chunk_servers()
 
-        for i in enumerate(chunk_ids):
-            chunk_id = chunk_ids[i]
-            chunk_loc = self.master.get_chunk_loc(chunk_id)
-            chunk_servers[chunk_loc].write_data(chunk_id, chunks_data[i])
+        for i, chunk_id in enumerate(chunk_ids):
+            loc_id = self.master.get_chunk_loc(chunk_id)
+            try:
+                # loc id needs to be replaced appropriately
+                con = rpyc.connect(loc_id, port=8000)
+                chunk_server = con.root.GFSChunkServer
+                chunk_server.write_data(chunk_id, chunk_data[i])
+                self.master.update_handle_table(chunk_id, loc_id)
+            except EnvironmentError:
+                log.error("Chunk Server Not Found")
+                print("WRITE ERROR: Please start chunkserver.py and try again")
+                sys.exit(1)
 
     def create(self, file_name, data):
         """Creates a File for given File Name and Data"""
@@ -36,7 +43,6 @@ class GFSClient:
             raise Exception("WRITE ERROR: File " + file_name + " already exists")
 
         num_chunks = self.__num_of_chunks(len(data))
-        # allocating chunk ids to each chunk
         chunk_ids = self.master.alloc(file_name, num_chunks)
         self.__write_chunks(chunk_ids, data)
 
@@ -45,15 +51,15 @@ class GFSClient:
             log.info("404: file not found")
             raise Exception("APPEND ERROR: File " + file_name + " does not exist")
         num_append_chunks = self.__num_of_chunks(len(data))
-        append_chunkuuids = self.master.alloc_append(file_name, num_append_chunks)
-        self.__write_chunks(append_chunkuuids, data)
+        append_chunk_ids = self.master.alloc_append(file_name, num_append_chunks)
+        self.__write_chunks(append_chunk_ids, data)
 
     def read(self, file_name):
+        """Returns the data for the given file
+        NOTE: GFS paper mentions that Client asks for an offset value with the file_name,
+        but for simplication we are going to read the whole file.
+        However, modifications can be made to read n number of bytes.
         """
-        Returns the data in the given file
-        """
-        # Note:GFS paper mentions that client only asks for the required chunk_servers
-        # but we are getting all the chunk servers once, for simplication.
 
         if not self.master.check_exists(file_name):
             log.info("404: file not found")
@@ -63,15 +69,18 @@ class GFSClient:
         # get all the chunk ids of the file from the master
         chunk_ids = self.master.get_chunk_ids(file_name)
 
-        # *this can be CACHED by the client for some duration*
-        chunk_servers = self.master.get_chunk_servers()
         for chunk_id in chunk_ids:
-            # get the first loc id of chunk,
-            # MIGHT REQUIRE CHANGES later on
-            chunk_loc = self.master.get_chunk_loc(chunk_id)
-            # write chunk data logic here, once you know how you're going to format the data
-            chunk = chunk_servers[chunk_loc].get_data(chunk_id)
-            chunks.append(chunk)
+            loc_id = self.master.get_chunk_loc(chunk_id)
+            try:
+                # loc id needs to be replaced appropriately
+                con = rpyc.connect(loc_id, port=8000)
+                chunk_server = con.root.GFSChunkServer
+                chunk = chunk_server.get_data(chunk_id)
+                chunks.append(chunk)
+            except EnvironmentError:
+                log.error("Chunk Server Not Found")
+                print("WRITE ERROR: Please start chunkserver.py and try again")
+                sys.exit(1)
 
         data = functools.reduce(lambda a, b: a + b, chunks)  # reassembling in order
 
@@ -79,17 +88,6 @@ class GFSClient:
 
     def delete(self, filename):
         self.master.delete(filename)
-
-
-def connect_chunk_server(loc_id):
-    try:
-        con = rpyc.connect(loc_id, port=8000)
-        chunk_server = con.root.GFSChunkServer()
-        return chunk_server
-    except EnvironmentError:
-        log.error("Chunk Server Not Found")
-        print("Please start chunkserver.py and try again")
-        sys.exit(1)
 
 
 def help_on_usage():
