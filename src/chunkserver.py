@@ -8,10 +8,6 @@ DATA_DIR += "/gfs_root/"
 
 class GFSChunkService(rpyc.Service):
     class exposed_GFSChunkServer:
-        def __init__(self):
-            self.handle_table = {}  # maps Chunk IDs to File Name, locally
-            # Need to understand this
-
         def exposed_write_data(self, chunk_id, data):
             """Writes data to the Chunk Server for given Chunk ID & Data"""
             local_filename = self.chunk_filename(chunk_id)

@@ -1,10 +1,8 @@
 import sys
 import functools
 import logging
-import rpyc
-
 from urllib.parse import urlparse
-
+import rpyc
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -100,8 +98,8 @@ class GFSClient:
         return data
 
     def delete(self, file_name):
+        """Connects with chunk servers and Deletes all the chunks of the file"""
         chunk_ids = self.master.get_chunk_ids(file_name)
-
         for chunk_id in chunk_ids:
             host, port = self.__get_host_port(self.master.get_loc_id(chunk_id))
             try:
@@ -126,7 +124,7 @@ def help_on_usage():
 
 def run(args):
     try:
-        # client and master are running on the same machine so we predefine the host
+        # Client and Master are running on the same machine so we predefined the host
         # port should be same as MASTER_PORT in the config file
         con = rpyc.connect("localhost", port=4531)
         client = GFSClient(con.root.GFSMaster())

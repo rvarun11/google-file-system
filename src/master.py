@@ -9,7 +9,6 @@ class GFSMasterService(rpyc.Service):
     class exposed_GFSMaster:
         def __init__(self):
             self.chunk_robin = 0  # for assigning chunk servers in order
-
             self.chunk_size = CHUNK_SIZE  # currently taking 8 bytes per chunk
             self.file_table = {}  # maps filename to list of chunk ids
             self.handle_table = {}  # maps chunk id to list of loc ids
