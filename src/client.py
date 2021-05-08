@@ -3,13 +3,27 @@ import functools
 import logging
 import rpyc
 
+from urllib.parse import urlparse
+
+
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
 
 
 class GFSClient:
     def __init__(self, master):
-        self.master = master  # replace with master later
+        self.master = master
+        # bringing all chunkservers at once for simplification
+        # GFS design states to only reqd servers and cache them for short duration
+        self.chunk_servers = self.master.chunk_servers
+
+    def __get_host_port(self, loc_id):
+        chunk_url = self.chunk_servers[loc_id]
+        parsed = urlparse(chunk_url)
+        host = parsed.hostname
+        port = parsed.port
+
+        return host, port
 
     def __num_of_chunks(self, file_size):
         """Returns the number of Chunks for given Size"""
@@ -26,23 +40,21 @@ class GFSClient:
 
         for i, chunk_id in enumerate(chunk_ids):
             loc_id = self.master.get_chunk_loc(chunk_id)
-            # write logic to convert loc_id to url
-            chunk_url = loc_id
+            host, port = self.__get_host_port(loc_id)
             try:
-                # loc id needs to be replaced appropriately
-                con = rpyc.connect(chunk_url, port=8000)
-                chunk_server = con.root.GFSChunkServer
+                con = rpyc.connect(host, port=port)
+                chunk_server = con.root.GFSChunkServer()
                 chunk_server.write_data(chunk_id, chunk_data[i])
                 self.master.update_handle_table(chunk_id, loc_id)
             except EnvironmentError:
-                log.error("Chunk Server not found")
-                print("WRITE ERROR: Please start chunkserver.py and try again")
+                log.error(" Cannot establish connection with the Chunk Server")
+                print("Write Error: Please start chunkserver.py and try again")
                 sys.exit(1)
 
     def create(self, file_name, data):
         """Creates a File for given File Name and Data"""
         if self.master.check_exists(file_name):
-            raise Exception("WRITE ERROR: File " + file_name + " already exists")
+            raise Exception("Write Error: File " + file_name + " already exists")
 
         num_chunks = self.__num_of_chunks(len(data))
         chunk_ids = self.master.alloc(file_name, num_chunks)
@@ -50,8 +62,8 @@ class GFSClient:
 
     def append(self, file_name, data):
         if not self.master.check_exists(file_name):
-            log.info("404: File not found")
-            raise Exception("APPEND ERROR: File " + file_name + " does not exist")
+            log.info(" (404) File not found")
+            raise Exception("Append Error: File " + file_name + " does not exist")
         num_append_chunks = self.__num_of_chunks(len(data))
         append_chunk_ids = self.master.alloc_append(file_name, num_append_chunks)
         self.__write_chunks(append_chunk_ids, data)
@@ -64,26 +76,23 @@ class GFSClient:
         """
 
         if not self.master.check_exists(file_name):
-            log.info("404: file not found")
-            raise Exception("READ ERROR: File " + file_name + " does not exist")
+            log.info(" (404) File not found")
+            raise Exception("Read Error: File " + file_name + " does not exist")
 
         chunks = []
         # get all the chunk ids of the file from the master
         chunk_ids = self.master.get_chunk_ids(file_name)
 
         for chunk_id in chunk_ids:
-            loc_id = self.master.get_chunk_loc(chunk_id)
-            # write logic to convert loc_id to url
-            chunk_url = loc_id
+            host, port = self.__get_host_port(self.master.get_loc_id(chunk_id))
             try:
-                # loc id needs to be replaced appropriately
-                con = rpyc.connect(chunk_url, port=8000)
-                chunk_server = con.root.GFSChunkServer
+                con = rpyc.connect(host, port=port)
+                chunk_server = con.root.GFSChunkServer()
                 chunk = chunk_server.get_data(chunk_id)
                 chunks.append(chunk)
             except EnvironmentError:
-                log.error("Chunk Server not found")
-                print("WRITE ERROR: Please start chunkserver.py and try again")
+                log.error(" Cannot establish connection with the Chunk Server")
+                print("Write Error: Please start chunkserver.py and try again")
                 sys.exit(1)
 
         data = functools.reduce(lambda a, b: a + b, chunks)  # reassembling in order
@@ -94,16 +103,14 @@ class GFSClient:
         chunk_ids = self.master.get_chunk_ids(file_name)
 
         for chunk_id in chunk_ids:
-            loc_id = self.master.get_chunk_loc(chunk_id)
-            # write logic to convert loc_id to url
-            chunk_url = loc_id
+            host, port = self.__get_host_port(self.master.get_loc_id(chunk_id))
             try:
-                con = rpyc.connect(chunk_url, port=8000)
-                chunk_server = con.root.GFSChunkServer
+                con = rpyc.connect(host, port=port)
+                chunk_server = con.root.GFSChunkServer()
                 chunk_server.delete_data(chunk_id)
             except EnvironmentError:
-                log.error("Chunk Server not found")
-                print("DELETE ERROR: Please start chunkserver.py and try again")
+                log.error(" Cannot establish connection with the Chunk Server")
+                print("Delete Error: Please start chunkserver.py and try again")
                 sys.exit(1)
 
         self.master.delete(file_name)
@@ -119,14 +126,14 @@ def help_on_usage():
 
 def run(args):
     try:
-        con = rpyc.connect("localhost", port=2131)
-        # if this doesn't work, add () at the end
-        client = GFSClient(con.root.GFSMaster)
+        # client and master are running on the same machine so we predefine the host
+        # port should be same as MASTER_PORT in the config file
+        con = rpyc.connect("localhost", port=4531)
+        client = GFSClient(con.root.GFSMaster())
     except EnvironmentError:
-        log.info("404: GFSMaster not found")
-        print("GFSMaster not found")
-        print("Please start master.py and try again")
-        return
+        log.error(" Cannot establish connection with GFSMaster")
+        print("Connection Error: Please start master.py and try again")
+        sys.exit(1)
 
     if len(args) == 0:
         help_on_usage()

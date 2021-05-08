@@ -37,9 +37,18 @@ class GFSChunkService(rpyc.Service):
             local_filename = DATA_DIR + "/" + str(chunk_id) + ".gfs"
             return local_filename
 
+        # def exposed_printf(self): # for testing
+        #     print("Hello from Chunk Server")
+
+
+def connect_to_master():
+    """Code for Dynamic Chunk Servers"""
+
 
 if __name__ == "__main__":
+    # connect_to_master()
+    print("GFSChunkServer is Running!")
     if not os.path.isdir(DATA_DIR):
         os.mkdir(DATA_DIR)
-    t = ThreadedServer(GFSChunkService, port=8000)
+    t = ThreadedServer(GFSChunkService, port=8010)
     t.start()

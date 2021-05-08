@@ -1,27 +1,20 @@
-# Default Master Port: 7000
-# Default Chunk Servers Port: 8000, need to changed individually if running locally, for now
-
 import uuid
 import rpyc
 from rpyc.utils.server import ThreadedServer
+
+from config import MASTER_PORT, CHUNK_SIZE, CHUNK_SERVERS
 
 
 class GFSMasterService(rpyc.Service):
     class exposed_GFSMaster:
         def __init__(self):
             self.chunk_robin = 0  # for assigning chunk servers in order
-            self.num_chunk_servers = 3
-            self.chunk_size = 8  # currently taking 8 bytes per chunk
+
+            self.chunk_size = CHUNK_SIZE  # currently taking 8 bytes per chunk
             self.file_table = {}  # maps filename to list of chunk ids
             self.handle_table = {}  # maps chunk id to list of loc ids
-
-            # maps loc id to chunk server URL
-            self.chunk_servers = {
-                # dummy servers
-                "1": "https://localhost",
-                "2": "https://cloud.google.com/",
-                "3": "https://aws.amazon.com/",
-            }
+            self.chunk_servers = CHUNK_SERVERS  # maps loc id to chunk server URL
+            self.num_chunk_servers = len(CHUNK_SERVERS)
 
         def exposed_check_exists(self, file_name):
             """Returns True for given File Name if its exists in file_table else False"""
@@ -31,7 +24,7 @@ class GFSMasterService(rpyc.Service):
             """Returns a List of Chunk IDs for given File Name"""
             return self.file_table[file_name]
 
-        def exposed_get_chunk_loc(self, chunk_id):
+        def exposed_get_loc_id(self, chunk_id):
             """Returns a List of Chunk Server Loc IDs for given Chunk ID"""
             return self.handle_table[chunk_id]
 
@@ -43,7 +36,7 @@ class GFSMasterService(rpyc.Service):
             self.handle_table[chunk_id].append(loc_id)
 
         def exposed_delete(self, file_name):
-            """TBA: Deletes file for given File Name"""
+            """Deletes file for given File Name"""
             del self.file_table[file_name]
 
         def exposed_alloc(self, file_name, num_chunks):
@@ -71,6 +64,6 @@ class GFSMasterService(rpyc.Service):
 
 
 if __name__ == "__main__":
-    t = ThreadedServer(GFSMasterService, port=7000)
-    t.start()
     print("GFSMaster is Running!")
+    t = ThreadedServer(GFSMasterService, port=MASTER_PORT)
+    t.start()
