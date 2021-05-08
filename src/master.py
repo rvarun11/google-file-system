@@ -1,3 +1,6 @@
+# Default Master Port: 7000
+# Default Chunk Servers Port: 8000, need to changed individually if running locally, for now
+
 import uuid
 import rpyc
 from rpyc.utils.server import ThreadedServer
@@ -12,10 +15,9 @@ class GFSMasterService(rpyc.Service):
             self.file_table = {}  # maps filename to list of chunk ids
             self.handle_table = {}  # maps chunk id to list of loc ids
 
-            # maps loc id to Chunk Server URL
-            # Master Port: 7000,
-            # Chunk Servers Port: 8000, need to changed individually if running locally, for now
+            # maps loc id to chunk server URL
             self.chunk_servers = {
+                # dummy servers
                 "1": "https://localhost",
                 "2": "https://cloud.google.com/",
                 "3": "https://aws.amazon.com/",
@@ -40,8 +42,9 @@ class GFSMasterService(rpyc.Service):
         def exposed_update_handle_table(self, chunk_id, loc_id):
             self.handle_table[chunk_id].append(loc_id)
 
-        def exposed_delete(self, filename):
+        def exposed_delete(self, file_name):
             """TBA: Deletes file for given File Name"""
+            del self.file_table[file_name]
 
         def exposed_alloc(self, file_name, num_chunks):
             """Returns a List of Chunk IDs for given File Name & its No. of Chunks"""

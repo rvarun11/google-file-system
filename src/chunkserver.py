@@ -26,6 +26,13 @@ class GFSChunkService(rpyc.Service):
                 data = file.read()
             return data
 
+        def exposed_delete_data(self, chunk_id):
+            """Deletes data from Chunk Server for given Chunk ID"""
+            local_filename = self.chunk_filename(chunk_id)
+            if not os.path.isfile(local_filename):
+                return None
+            os.remove(local_filename)
+
         def chunk_filename(self, chunk_id):
             local_filename = DATA_DIR + "/" + str(chunk_id) + ".gfs"
             return local_filename

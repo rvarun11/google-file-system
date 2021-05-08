@@ -26,14 +26,16 @@ class GFSClient:
 
         for i, chunk_id in enumerate(chunk_ids):
             loc_id = self.master.get_chunk_loc(chunk_id)
+            # write logic to convert loc_id to url
+            chunk_url = loc_id
             try:
                 # loc id needs to be replaced appropriately
-                con = rpyc.connect(loc_id, port=8000)
+                con = rpyc.connect(chunk_url, port=8000)
                 chunk_server = con.root.GFSChunkServer
                 chunk_server.write_data(chunk_id, chunk_data[i])
                 self.master.update_handle_table(chunk_id, loc_id)
             except EnvironmentError:
-                log.error("Chunk Server Not Found")
+                log.error("Chunk Server not found")
                 print("WRITE ERROR: Please start chunkserver.py and try again")
                 sys.exit(1)
 
@@ -48,7 +50,7 @@ class GFSClient:
 
     def append(self, file_name, data):
         if not self.master.check_exists(file_name):
-            log.info("404: file not found")
+            log.info("404: File not found")
             raise Exception("APPEND ERROR: File " + file_name + " does not exist")
         num_append_chunks = self.__num_of_chunks(len(data))
         append_chunk_ids = self.master.alloc_append(file_name, num_append_chunks)
@@ -71,14 +73,16 @@ class GFSClient:
 
         for chunk_id in chunk_ids:
             loc_id = self.master.get_chunk_loc(chunk_id)
+            # write logic to convert loc_id to url
+            chunk_url = loc_id
             try:
                 # loc id needs to be replaced appropriately
-                con = rpyc.connect(loc_id, port=8000)
+                con = rpyc.connect(chunk_url, port=8000)
                 chunk_server = con.root.GFSChunkServer
                 chunk = chunk_server.get_data(chunk_id)
                 chunks.append(chunk)
             except EnvironmentError:
-                log.error("Chunk Server Not Found")
+                log.error("Chunk Server not found")
                 print("WRITE ERROR: Please start chunkserver.py and try again")
                 sys.exit(1)
 
@@ -86,8 +90,23 @@ class GFSClient:
 
         return data
 
-    def delete(self, filename):
-        self.master.delete(filename)
+    def delete(self, file_name):
+        chunk_ids = self.master.get_chunk_ids(file_name)
+
+        for chunk_id in chunk_ids:
+            loc_id = self.master.get_chunk_loc(chunk_id)
+            # write logic to convert loc_id to url
+            chunk_url = loc_id
+            try:
+                con = rpyc.connect(chunk_url, port=8000)
+                chunk_server = con.root.GFSChunkServer
+                chunk_server.delete_data(chunk_id)
+            except EnvironmentError:
+                log.error("Chunk Server not found")
+                print("DELETE ERROR: Please start chunkserver.py and try again")
+                sys.exit(1)
+
+        self.master.delete(file_name)
 
 
 def help_on_usage():
