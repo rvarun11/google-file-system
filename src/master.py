@@ -15,13 +15,17 @@ class GFSMasterService(rpyc.Service):
             self.chunk_servers = CHUNK_SERVERS  # maps loc id to chunk server URL
             self.num_chunk_servers = len(CHUNK_SERVERS)
 
+        def exposed_get_chunk_size(self):
+            """Returns a Chunk Size"""
+            return self.chunk_size
+
         def exposed_check_exists(self, file_name):
             """Returns True for given File Name if its exists in file_table else False"""
             return file_name in self.file_table
 
         def exposed_get_chunk_ids(self, file_name):
             """Returns a List of Chunk IDs for given File Name"""
-            return self.file_table[file_name]
+            print(self.file_table)
 
         def exposed_get_loc_id(self, chunk_id):
             """Returns a List of Chunk Server Loc IDs for given Chunk ID"""
@@ -30,9 +34,6 @@ class GFSMasterService(rpyc.Service):
         def exposed_get_chunk_servers(self):
             """Returns a List of all available Chunk Servers"""
             return self.chunk_servers
-
-        def exposed_update_handle_table(self, chunk_id, loc_id):
-            self.handle_table[chunk_id].append(loc_id)
 
         def exposed_delete(self, file_name):
             """Deletes file for given File Name"""
@@ -51,9 +52,12 @@ class GFSMasterService(rpyc.Service):
             return append_chunk_ids
 
         def alloc_chunks(self, num_chunks):
-            """Returns a List of Chunk UUIDs for given No. of Chunks"""
+            """Returns a List of Chunk UUIDs for given No. of Chunks
+            NOTE: Each chunk_id in the handle_table is currently storing one loc_id.
+            For replication, this needs to be converted to a list.
+            """
             chunk_ids = []
-            for _ in range(len(num_chunks)):
+            for _ in range(num_chunks):
                 chunk_id = uuid.uuid4()
                 self.handle_table[chunk_id] = self.chunk_robin
                 chunk_ids.append(chunk_id)
