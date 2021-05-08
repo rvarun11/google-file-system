@@ -9,8 +9,8 @@ from rpyc.utils.server import ThreadedServer
 class GFSMasterService(rpyc.Service):
     class exposed_GFSMaster:
         def __init__(self):
-            self.num_chunk_servers = 3
             self.chunk_robin = 0  # for assigning chunk servers in order
+            self.num_chunk_servers = 3
             self.chunk_size = 8  # currently taking 8 bytes per chunk
             self.file_table = {}  # maps filename to list of chunk ids
             self.handle_table = {}  # maps chunk id to list of loc ids
