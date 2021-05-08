@@ -4,7 +4,7 @@
 Project is based on the paper [Google File System](https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf)
 
 ## Changelog
-- Added CREATE, READ, APPEND & DELETE operations
+- Added Create, Read, Append & Delete operations
 - Working on adding Remote Procedure Calls with `rpyc`
 
 ## Future Work
