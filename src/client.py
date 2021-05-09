@@ -3,6 +3,11 @@ import functools
 from urllib.parse import urlparse
 import rpyc
 
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+log = logging.getLogger(__name__)
+
 
 class GFSClient:
     def __init__(self, master):
@@ -10,6 +15,12 @@ class GFSClient:
         # bringing all chunkservers at once for simplification
         # GFS design states to only reqd servers and cache them for short duration
         self.chunk_servers = self.master.get_chunk_servers()
+
+    def __get_host_key(self, loc_id):
+        items = self.chunk_servers[loc_id]
+        host = items[0]
+        key = items[1]
+        return host, key
 
     def __get_host_port(self, loc_id):
         chunk_url = self.chunk_servers[loc_id]
@@ -28,18 +39,18 @@ class GFSClient:
         """Writes data to chunk servers for given List of Chunk IDs and Data"""
         chunk_size = self.master.get_chunk_size()
         chunk_data = [data[x : x + chunk_size] for x in range(0, len(data), chunk_size)]
-
         for i, chunk_id in enumerate(chunk_ids):
-            loc_id = self.master.get_loc_id(chunk_id)
-            host, port = self.__get_host_port(loc_id)
-            try:
-                con = rpyc.connect(host, port=port)
-                chunk_server = con.root.GFSChunkServer()
-                chunk_server.write_data(chunk_id, chunk_data[i])
-            except EnvironmentError:
-                print("Cannot establish connection with the Chunk Server")
-                print("Write Error: Please start chunkserver.py and try again")
-                sys.exit(1)
+            loc_ids = self.master.get_loc_ids(chunk_id)
+            for loc_id in loc_ids:
+                host, port = self.__get_host_port(loc_id)
+                try:
+                    con = rpyc.connect(host, port=port)
+                    chunk_server = con.root.GFSChunkServer()
+                    chunk_server.write_data(chunk_id, chunk_data[i])
+                except EnvironmentError:
+                    log.info("Cannot establish connection with Chunk Server")
+
+        sys.exit(1)
 
     def create(self, file_name, data):
         """Creates a File for given File Name and Data"""
@@ -54,6 +65,7 @@ class GFSClient:
         if not self.master.check_exists(file_name):
             print("(404) File not found")
             raise Exception("Append Error: File " + file_name + " does not exist")
+
         num_append_chunks = self.__num_of_chunks(len(data))
         append_chunk_ids = self.master.alloc_append(file_name, num_append_chunks)
         self.__write_chunks(append_chunk_ids, data)
@@ -73,39 +85,40 @@ class GFSClient:
         chunk_ids = self.master.get_chunk_ids(file_name)
 
         for chunk_id in chunk_ids:
-            host, port = self.__get_host_port(self.master.get_loc_id(chunk_id))
-            try:
-                con = rpyc.connect(host, port=port)
-                chunk_server = con.root.GFSChunkServer()
-                chunk = chunk_server.get_data(chunk_id)
-                chunks.append(chunk)
-            except EnvironmentError:
-                print("Cannot establish connection with the Chunk Server")
-                print("Write Error: Please start chunkserver.py and try again")
-                sys.exit(1)
+            loc_ids = self.master.get_loc_ids(chunk_id)
+            for loc_id in loc_ids:
+                host, port = self.__get_host_port(loc_id)
+                try:
+                    con = rpyc.connect(host, port=port)
+                    chunk_server = con.root.GFSChunkServer()
+                    chunk = chunk_server.get_data(chunk_id)
+                    chunks.append(chunk)
+                    break
+                except EnvironmentError:
+                    log.info("Cannot establish connection with Chunk Server")
 
         data = functools.reduce(lambda a, b: a + b, chunks)  # reassembling in order
 
         print(data)
 
-        return data
-
     def delete(self, file_name):
         """Connects with chunk servers and Deletes all the chunks of the file"""
         chunk_ids = self.master.get_chunk_ids(file_name)
         for chunk_id in chunk_ids:
-            host, port = self.__get_host_port(self.master.get_loc_id(chunk_id))
-            try:
-                con = rpyc.connect(host, port=port)
-                chunk_server = con.root.GFSChunkServer()
-                chunk_server.delete_data(chunk_id)
-            except EnvironmentError:
-                print("Cannot establish connection with the Chunk Server")
-                print("Delete Error: Please start chunkserver.py and try again")
-                sys.exit(1)
+            loc_ids = self.master.get_loc_ids(chunk_id)
+            for loc_id in loc_ids:
+                host, port = self.__get_host_port(loc_id)
+                try:
+                    con = rpyc.connect(host, port=port)
+                    chunk_server = con.root.GFSChunkServer()
+                    chunk_server.delete_data(chunk_id)
+                except EnvironmentError:
+                    log.info("Cannot establish connection with Chunk Server")
+
             self.master.delete_chunk(chunk_id)
 
         self.master.delete_file(file_name)
+        sys.exit(1)
 
     def list(self):
         files = self.master.list_files()
@@ -136,7 +149,6 @@ def run(args):
     if len(args) == 0:
         help_on_usage()
         return
-
     if args[0] == "create":
         client.create(args[1], args[2])
     elif args[0] == "read":

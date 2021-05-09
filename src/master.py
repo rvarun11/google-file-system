@@ -1,12 +1,13 @@
 import uuid
 import signal
+import random
 import pickle
 import sys
 import os
 import rpyc
 from rpyc.utils.server import ThreadedServer
 
-from config import MASTER_PORT, CHUNK_SIZE, CHUNK_SERVERS
+import config
 
 
 def int_handler(signal, frame):
@@ -15,27 +16,28 @@ def int_handler(signal, frame):
             GFSMasterService.exposed_GFSMaster.file_table,
             GFSMasterService.exposed_GFSMaster.handle_table,
         ),
-        open("test.img", "wb"),
+        open("gfs.img", "wb"),
     )
     sys.exit(0)
 
 
-def load_fs():
-    if os.path.isfile("test.img"):
+def load_backup():
+    if os.path.isfile("gfs.img"):
         (
             GFSMasterService.exposed_GFSMaster.file_table,
             GFSMasterService.exposed_GFSMaster.handle_table,
-        ) = pickle.load(open("test.img", "rb"))
+        ) = pickle.load(open("gfs.img", "rb"))
 
 
 class GFSMasterService(rpyc.Service):
     class exposed_GFSMaster:
+        replication_factor = config.REPLICATION_FACTOR  # no. of replicas
         chunk_robin = 0  # for assigning chunk servers in order
-        chunk_size = CHUNK_SIZE  # currently taking 8 bytes per chunk
+        chunk_size = config.CHUNK_SIZE  # currently taking 8 bytes per chunk
         file_table = {}  # maps filename to list of chunk ids
         handle_table = {}  # maps chunk id to list of loc ids
-        chunk_servers = CHUNK_SERVERS  # maps loc id to chunk server URL
-        num_chunk_servers = len(CHUNK_SERVERS)
+        chunk_servers = config.CHUNK_SERVERS  # maps loc id to chunk server URL
+        num_chunk_servers = len(config.CHUNK_SERVERS)
 
         def exposed_list_files(self):
             return self.file_table.keys()
@@ -52,7 +54,7 @@ class GFSMasterService(rpyc.Service):
             """Returns a List of Chunk IDs for given File Name"""
             return self.__class__.file_table[file_name]
 
-        def exposed_get_loc_id(self, chunk_id):
+        def exposed_get_loc_ids(self, chunk_id):
             """Returns a List of Chunk Server Loc IDs for given Chunk ID"""
             return self.__class__.handle_table[chunk_id]
 
@@ -67,18 +69,16 @@ class GFSMasterService(rpyc.Service):
         def exposed_delete_file(self, file_name):
             """Deletes file for given File Name"""
             del self.__class__.file_table[file_name]
-            self.print_tables()
 
         def exposed_alloc(self, file_name, num_chunks):
             """Returns a List of Chunk IDs for given File Name & its No. of Chunks"""
             chunk_ids = self.alloc_chunks(num_chunks)
             self.__class__.file_table[file_name] = chunk_ids
-
-            self.print_tables()
+            # self.print_ft()
             return chunk_ids
 
         def exposed_alloc_append(self, file_name, num_append_chunks):
-            """XXXX"""
+            """Return a List of new Chunk IDs for appending"""
             append_chunk_ids = self.alloc_chunks(num_append_chunks)
             self.__class__.file_table[file_name].extend(append_chunk_ids)
             return append_chunk_ids
@@ -91,25 +91,28 @@ class GFSMasterService(rpyc.Service):
             chunk_ids = []
             for _ in range(num_chunks):
                 chunk_id = uuid.uuid4()
-                self.__class__.handle_table[chunk_id] = self.__class__.chunk_robin
+                loc_ids = random.sample(
+                    list(self.__class__.chunk_servers.keys()),
+                    self.__class__.replication_factor,
+                )
+                self.__class__.handle_table[chunk_id] = loc_ids
                 chunk_ids.append(chunk_id)
-                self.__class__.chunk_robin = (
-                    self.__class__.chunk_robin + 1
-                ) % self.__class__.num_chunk_servers
-
+            # self.print_ht()
             return chunk_ids
 
         # for debugging
-        def print_tables(self):
+        def print_ft(self):
             print("\n-------------- File Table --------------")
             print(self.__class__.file_table)
+
+        def print_ht(self):
             print("\n-------------- Handle Table --------------")
             print(self.__class__.handle_table)
 
 
 if __name__ == "__main__":
-    load_fs()
+    load_backup()
     signal.signal(signal.SIGINT, int_handler)
     print("GFSMaster is Running!")
-    t = ThreadedServer(GFSMasterService, port=MASTER_PORT)
+    t = ThreadedServer(GFSMasterService, port=config.MASTER_PORT)
     t.start()
