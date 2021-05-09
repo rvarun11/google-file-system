@@ -64,30 +64,31 @@ class GFSClient:
         but for simplication we are going to read the whole file.
         However, modifications can be made to read n number of bytes.
         """
-        self.master.get_chunk_ids(file_name)
-        # if not self.master.check_exists(file_name):
-        #     print("(404) File not found")
-        #     raise Exception("Read Error: File " + file_name + " does not exist")
+        if not self.master.check_exists(file_name):
+            print("(404) File not found")
+            raise Exception("Read Error: File " + file_name + " does not exist")
 
-        # chunks = []
-        # # get all the chunk ids of the file from the master
-        # chunk_ids = self.master.get_chunk_ids(file_name)
+        chunks = []
+        # get all the chunk ids of the file from the master
+        chunk_ids = self.master.get_chunk_ids(file_name)
 
-        # for chunk_id in chunk_ids:
-        #     host, port = self.__get_host_port(self.master.get_loc_id(chunk_id))
-        #     try:
-        #         con = rpyc.connect(host, port=port)
-        #         chunk_server = con.root.GFSChunkServer()
-        #         chunk = chunk_server.get_data(chunk_id)
-        #         chunks.append(chunk)
-        #     except EnvironmentError:
-        #         print("Cannot establish connection with the Chunk Server")
-        #         print("Write Error: Please start chunkserver.py and try again")
-        #         sys.exit(1)
+        for chunk_id in chunk_ids:
+            host, port = self.__get_host_port(self.master.get_loc_id(chunk_id))
+            try:
+                con = rpyc.connect(host, port=port)
+                chunk_server = con.root.GFSChunkServer()
+                chunk = chunk_server.get_data(chunk_id)
+                chunks.append(chunk)
+            except EnvironmentError:
+                print("Cannot establish connection with the Chunk Server")
+                print("Write Error: Please start chunkserver.py and try again")
+                sys.exit(1)
 
-        # data = functools.reduce(lambda a, b: a + b, chunks)  # reassembling in order
+        data = functools.reduce(lambda a, b: a + b, chunks)  # reassembling in order
 
-        # return data
+        print(data)
+
+        return data
 
     def delete(self, file_name):
         """Connects with chunk servers and Deletes all the chunks of the file"""
@@ -102,8 +103,15 @@ class GFSClient:
                 print("Cannot establish connection with the Chunk Server")
                 print("Delete Error: Please start chunkserver.py and try again")
                 sys.exit(1)
+            self.master.delete_chunk(chunk_id)
 
-        self.master.delete(file_name)
+        self.master.delete_file(file_name)
+
+    def list(self):
+        files = self.master.list_files()
+        print("-------------- Files in the GFS --------------")
+        for file in files:
+            print(file)
 
 
 def help_on_usage():
@@ -137,6 +145,8 @@ def run(args):
         client.append(args[1], args[2])
     elif args[0] == "delete":
         client.delete(args[1])
+    elif args[0] == "list":
+        client.list()
     else:
         print("Incorrect Command")
         help_on_usage()
