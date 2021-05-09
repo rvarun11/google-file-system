@@ -4,12 +4,13 @@
 Project is based on the paper [Google File System](https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf)
 
 ## Changelog
+- Added replication factor
 - Added Create, Read, Append, Delete & List operations
 - Added Remote Procedure Calls with `rpyc`
 
 ## Future Work
-- Heartbeat Monitor: Master needs to regularly check for running chunk servers.
 - Dynamic Chunk Servers: Right now the Chunk Servers have to be manually added to config file. This can be improved by making the chunk server establish a connection with master and then it is added to the chunk server table.
+- Heartbeat Monitor: Master needs to regularly check for running chunk servers.
 
 ## Dependency
 - rpyc
