@@ -27,4 +27,4 @@ Project is based on the paper [Google File System](https://static.googleusercont
 - List: `python client.py list`
 
 ## Demo
-To be added soon
+[Youtube Video](https://youtu.be/LDqfd4PvoiQ)
