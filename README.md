@@ -3,7 +3,7 @@
 
 Project is based on the paper [Google File System](https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf).
 
-[Demo Link](https://youtu.be/LDqfd4PvoiQ)
+Project Demo - https://youtu.be/LDqfd4PvoiQ
 
 ## Changelog
 - Added replication factor
