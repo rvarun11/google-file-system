@@ -1,7 +1,9 @@
 # google-file-system
 ![status](https://img.shields.io/badge/version-0.1-85a832) 
 
-Project is based on the paper [Google File System](https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf)
+Project is based on the paper [Google File System](https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf).
+
+[Demo Link](https://youtu.be/LDqfd4PvoiQ)
 
 ## Changelog
 - Added replication factor
@@ -26,5 +28,4 @@ Project is based on the paper [Google File System](https://static.googleusercont
 
 - List: `python client.py list`
 
-## Demo
-[Video](https://youtu.be/LDqfd4PvoiQ)
+
