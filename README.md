@@ -3,6 +3,8 @@
 
 Project is based on the paper [Google File System](https://static.googleusercontent.com/media/research.google.com/en//archive/gfs-sosp2003.pdf).
 
+[System Design Document](https://github.com/rvarun11/google-file-system/blob/main/systemdesign.md)
+
 Project Demo - https://youtu.be/LDqfd4PvoiQ
 
 ## Changelog
