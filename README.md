@@ -5,7 +5,7 @@ Project is based on the paper [Google File System](https://static.googleusercont
 
 Project Demo - https://youtu.be/LDqfd4PvoiQ
 
-Index : [Changelog](##changelog) | [Dependency](##dependency) | [Commamnds](##commands) | [## Architecture](##architecture)
+Index : [Changelog](#changelog) | [Dependency](#dependency) | [Commamnds](#commands) | [Architecture](#architecture)
 
 
 ## Changelog
