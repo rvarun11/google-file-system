@@ -9,10 +9,9 @@ Index : [Changelog](#changelog) | [Dependency](#dependency) | [Commamnds](#comma
 
 
 ## Changelog
+- Added Remote Procedure Calls with `rpyc`
 - Added replication factor
 - Added Create, Read, Append, Delete & List operations
-- Added Remote Procedure Calls with `rpyc`
-
 
 
 ## Dependency
