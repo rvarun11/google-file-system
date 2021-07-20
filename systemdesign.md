@@ -13,7 +13,7 @@ To understand:
 1. Working of Distributed File Systems while building a simple fault tolerant GFS.
 2. Working of RPC.
 
-### Design Goals
+### Design Goals & Assumptions
 1. To build a client, a master server and three chunk servers with design similar to GFS.
 
 2. **Client**
@@ -31,5 +31,11 @@ To understand:
     1. The chunk servers will be naive (no periodic heartbeats) and they'll only be used for Reading/Writing data from disk.
     2. Data will be not cached.
     3. Their location will be stored beforehand and will be accessible by the master.
+    4. All replicas are given equal priority, instead of 
 
 5. Ability to handle faults by completing the operation in progress even if one chunk server goes down.
+
+
+### Language Specifications
+Due to time constraints, simplicity was favoured over a complex design as in the actual GFS. 
+For this, I decided to choose Python and RPyC instead of using something like C++ and gRPC.
