@@ -5,7 +5,7 @@ Project is based on the paper [Google File System](https://static.googleusercont
 
 Project Demo - https://youtu.be/LDqfd4PvoiQ
 
-Index : [Changelog](##-changelog) | [Future Work](#)
+Index : [Changelog](##-changelog) | [Dependency](##-dependency) | [Commamnds](##-commands) | [## Architecture](##-architecture)
 
 
 ## Changelog
@@ -30,7 +30,7 @@ Index : [Changelog](##-changelog) | [Future Work](#)
 - List: `python client.py list`
 
 
-## Design 
+## Architecture
 
 The following architecture is based on the design goals mentioned below.
 
@@ -81,5 +81,5 @@ To understand:
 Due to time constraints, simplicity was favoured over a complex and more apt design, as in the actual GFS. 
 So, I decided to go with Python and [RPyC](https://rpyc.readthedocs.io/en/latest/docs/theory.html#theory) instead of using something like C++ and gRPC which would've been better for learning.
 
-## Future Work
+### Future Work
 Dynamic Chunk Servers: Right now the Chunk Servers are naive have to be manually configured so that they can be used. This can be improved upon by making chunk servers establish a connection with master and then adding its URI to the the chunk server table. This will allow building of additional features like the Heartbeat Monitor. 
