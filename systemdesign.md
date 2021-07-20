@@ -11,7 +11,7 @@
 ### Goal for the project
 To understand:
 1. Working of Distributed File Systems while building a simple fault tolerant GFS.
-2. Working of RPC.
+2. Working of RPCs.
 
 ### Design Goals & Assumptions
 1. To build a client, a master server and three chunk servers with design similar to GFS.
@@ -26,6 +26,7 @@ To understand:
     3. Instead of having only two tables, I'll be dividing the same logic into 3 tables, namely file_table, handle_table and chunk_servers, for simplicity.
     4. I'm also assuming that the master server will always work for the system to function properly. To make the system more fault tolerant 
     and deal with master server failure, shadow copy of the master has to be created, which is beyond the scope of this project.
+    
 
 4. **Chunk Server**
     1. The chunk servers will be naive (no periodic heartbeats) and they'll only be used for Reading/Writing data from disk.
@@ -33,7 +34,7 @@ To understand:
     3. Their location will be stored beforehand and will be accessible by the master.
     4. All replicas are given equal priority, instead of 
 
-5. Ability to handle faults by completing the operation in progress even if one chunk server goes down.
+6. Ability to handle faults by completing the operation in progress even if one chunk server goes down.
 
 
 ### Language Specifications
