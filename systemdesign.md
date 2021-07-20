@@ -39,4 +39,4 @@ To understand:
 
 ### Language Specifications
 Due to time constraints, simplicity was favoured over a complex design as in the actual GFS. 
-For this, I decided to choose Python and RPyC instead of using something like C++ and gRPC.
+So, I decided to go with Python and RPyC instead of using something like C++ and gRPC which would've been better for learning.
