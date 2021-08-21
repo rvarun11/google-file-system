@@ -39,7 +39,7 @@ The following architecture is based on the design goals mentioned below.
 ### Why Big Storage is hard?
 1. To improve __performance__, large systems require __sharding__
 2. _Sharding_ leads to _faults_
-3. To improve _fault tolerance_ we have make _replications_
+3. To improve _fault tolerance_ we need make _replications_
 4. _Replications_ leads to _inconsistencies_
 5. To bring _consistency_, we often require clever design where the clients and servers have to do more work, this leads to _low persformance_
 
