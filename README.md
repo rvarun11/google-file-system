@@ -41,7 +41,7 @@ The following architecture is based on the design goals mentioned below.
 2. _Sharding_ leads to _faults_
 3. To improve _fault tolerance_ we need make _replications_
 4. _Replications_ leads to _inconsistencies_
-5. To bring _consistency_, we often require clever design where the clients and servers have to do more work, this leads to _low persformance_
+5. To bring _consistency_, we often require clever design where the clients and servers have to do more work, this leads to _low performance_
 
 
 ### Goal for the project
