@@ -71,9 +71,8 @@ To understand:
     1. The chunk servers will be naive (no periodic heartbeats) and they'll only be used for Reading/Writing data from disk.
     2. Data will be not cached.
     3. Their location will be stored beforehand and will be accessible by the master.
-    4. All replicas are given equal priority, instead of 
-
-6. Ability to handle faults by completing the operation in progress even if one chunk server goes down.
+    4. All replicas are given equal priority. 
+    5. Ability to handle faults by completing the operation in progress even if one chunk server goes down.
 
 
 ### Language Specifications
